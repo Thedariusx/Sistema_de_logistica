@@ -1,38 +1,858 @@
+/* ===== RESET Y ESTILOS BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .App {
+  text-align: center;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===== LAYOUT PRINCIPAL ===== */
+.App-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  color: white;
+  min-height: 100vh;
+}
+
+/* ===== HEADER DE USUARIO ===== */
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px 20px;
+  border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+
+.user-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 1.1rem;
+}
+
+.logout-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* ===== SISTEMA DE PESTAÑAS ===== */
+.tabs {
+  margin: 30px 0;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.tabs button {
+  padding: 15px 25px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.tabs button:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.tabs button.active {
+  background: rgba(255,255,255,0.9);
+  color: #2c3e50;
+  border-color: rgba(255,255,255,0.8);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+/* ===== CONTENIDO DE PESTAÑAS ===== */
+.tab-content {
+  margin: 30px auto;
+  max-width: 900px;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.tab-content h2 {
+  font-size: 2.2rem;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+/* ===== MENSAJES DEL SISTEMA ===== */
+.message {
+  padding: 15px 25px;
+  margin: 20px auto;
+  border-radius: 12px;
+  font-weight: 600;
+  max-width: 600px;
+  font-size: 1rem;
+  border: none;
+}
+
+.message.success {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.message.error {
+  background: linear-gradient(135deg, #f44336, #da190b);
+  color: white;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+}
+
+/* ===== FORMULARIOS ===== */
+.tracking-form {
+  margin: 40px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.tracking-form input {
+  padding: 15px 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  font-size: 16px;
+  width: 400px;
+  max-width: 100%;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.tracking-form input::placeholder {
+  color: rgba(255,255,255,0.7);
+}
+
+.tracking-form input:focus {
+  outline: none;
+  border-color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.2);
+  box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+/* ===== BOTONES GENERALES ===== */
+button {
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #2980b9, #2573a7);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+}
+
+button:active {
+  transform: translateY(-1px);
+}
+
+/* ===== TARJETAS ===== */
+.card {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 30px;
+  margin: 25px auto;
+  border-radius: 20px;
+  text-align: left;
+  max-width: 700px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: white;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.card p {
+  margin: 15px 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* ===== ESTADOS DE ENVÍO ===== */
+.status {
+  padding: 8px 16px;
+  border-radius: 25px;
+  margin-left: 12px;
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.status.registered {
+  background: linear-gradient(135deg, #FF9800, #F57C00);
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.status.in-transit {
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  color: white;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.status.out-for-delivery {
+  background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+  color: white;
+}
+
+.status.delivered {
+  background: linear-gradient(135deg, #4CAF50, #388E3C);
+  color: white;
+}
+
+.status.cancelled {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+}
+
+/* ===== RESULTADO DE TRACKING ===== */
+.tracking-result {
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+  padding: 35px;
+  margin: 30px auto;
+  border-radius: 20px;
+  max-width: 700px;
+  text-align: left;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.tracking-result h3 {
+  font-size: 1.8rem;
+  margin-bottom: 25px;
+  text-align: center;
+  color: white;
+}
+
+.tracking-details p {
+  margin: 18px 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.tracking-details strong {
+  min-width: 180px;
+  display: inline-block;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ===== LISTAS ===== */
+.features-list {
+  list-style: none;
+  padding: 0;
+}
+
+.features-list li {
+  padding: 12px 0;
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  text-align: left;
+}
+
+.management-list {
+  margin-top: 30px;
+}
+
+.package-management-card {
+  background: rgba(255,255,255,0.1);
+  margin: 15px 0;
+  padding: 20px;
+  border-radius: 15px;
+  border-left: 5px solid #3498db;
+  transition: all 0.3s ease;
+}
+
+.package-management-card:hover {
+  transform: translateX(10px);
+  background: rgba(255,255,255,0.15);
+}
+
+/* ===== PÁGINA DE LOGIN ===== */
+.login-logo {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 40px 20px 20px;
+}
+
+.login-logo h1 {
+  color: white;
+  margin-bottom: 15px;
+  font-size: 3rem;
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.login-logo p {
+  color: rgba(255,255,255,0.8);
+  font-size: 1.3rem;
+  font-weight: 300;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 20px;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  margin: 20px;
+  backdrop-filter: blur(20px);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.login-header h2 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.login-header p {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+/* Formulario de login */
+.login-form {
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid #e1e8ed;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+  color: #2c3e50;
+}
+
+.login-form input:focus {
+  border-color: #3498db;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.login-form input:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+  letter-spacing: 0.5px;
+}
+
+.btn-login:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2980b9, #2573a7);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(52, 152, 219, 0.4);
+}
+
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Cuentas de prueba */
+.test-accounts {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 25px;
+  margin-top: 30px;
+  border: 2px solid #e1e8ed;
+}
+
+.test-accounts h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.account {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 2px solid #e1e8ed;
+  transition: all 0.3s ease;
+}
+
+.account:hover {
+  border-color: #3498db;
+  box-shadow: 0 5px 20px rgba(52, 152, 219, 0.15);
+  transform: translateY(-2px);
+}
+
+.account-role {
+  font-weight: 800;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.account-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-details span {
+  color: #34495e;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.account-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.copy-btn, .load-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.copy-btn {
+  background: #f8f9fa;
+  color: #3498db;
+  border: 2px solid #e1e8ed;
+}
+
+.copy-btn:hover {
+  background: #3498db;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.load-btn {
+  background: linear-gradient(135deg, #27ae60, #219653);
+  color: white;
+}
+
+.load-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #219653, #1e8449);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+}
+
+.load-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.account-description {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+.universal-password {
+  background: linear-gradient(135deg, #e8f5e8, #d4edda);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 20px;
+  text-align: center;
+  border: 2px solid #27ae60;
+}
+
+.universal-password p {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Ayuda de login */
+.login-help {
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 25px;
+  border: 2px solid #ffd351;
+}
+
+.login-help p {
+  margin: 0 0 15px 0;
+  color: #856404;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.login-help ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #856404;
+  text-align: left;
+}
+
+.login-help li {
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .user-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .user-header h1 {
+    font-size: 1.8rem;
   }
+  
+  .tabs {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .tabs button {
+    width: 250px;
+  }
+  
+  .tracking-form {
+    flex-direction: column;
+  }
+  
+  .tracking-form input {
+    width: 100%;
+  }
+  
+  .login-card {
+    padding: 25px;
+    margin: 10px;
+  }
+  
+  .account-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .account-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .tracking-details p {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .tracking-details strong {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .App-header {
+    padding: 15px;
+  }
+  
+  .login-logo h1 {
+    font-size: 2.2rem;
+  }
+  
+  .tab-content h2 {
+    font-size: 1.8rem;
+  }
+  
+  .card, .tracking-result {
+    padding: 20px;
+    margin: 15px;
+  }
+  /* Estilos para roles */
+.user-role {
+  background: rgba(255,255,255,0.2);
+  padding: 4px 8px;
+  border-radius: 8px;
+  margin-left: 8px;
+  font-size: 0.9rem;
+}
+
+.user-role-badge {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Grid de paquetes */
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Acciones de paquetes */
+.package-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.package-actions button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 120px;
+}
+
+.package-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.package-header h4 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+/* Botones de acción */
+.action-buttons {
+  margin: 25px 0;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+/* === ESTILOS PARA MODAL Y FORMULARIOS === */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: #2c3e50;
+}
+
+.modal-content h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.modal-content .form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.modal-content label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+  color: #2c3e50;
+}
+
+.modal-content input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.form-actions button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.form-actions button:first-child {
+  background: #27ae60;
+  color: white;
+}
+
+.form-actions button:first-child:hover {
+  background: #219653;
+  transform: translateY(-2px);
+}
+
+.form-actions button:last-child {
+  background: #e74c3c;
+  color: white;
+}
+
+.form-actions button:last-child:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* Select para mensajeros */
+.messenger-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  color: #2c3e50;
+  margin-top: 5px;
+}
+
+.messenger-select:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+/* Mejoras para las tarjetas de envío */
+.package-management-card .form-group {
+  margin: 15px 0;
+}
+
+.package-management-card label {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
 }
