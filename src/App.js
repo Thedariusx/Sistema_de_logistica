@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import RegisterForm from './components/RegisterForm';
+
 
 function App() {
   // === TODOS LOS ESTADOS DEBEN ESTAR DENTRO DE LA FUNCIÓN App ===
   const [message, setMessage] = useState('');
   const [trackingData, setTrackingData] = useState(null);
   const [trackingCode, setTrackingCode] = useState('');
-  const [activeTab, setActiveTab] = useState('login');
   const [allPackages, setAllPackages] = useState([]);
   const [users, setUsers] = useState([]);
   const generateQR = (packageId) => {
@@ -26,6 +27,7 @@ function App() {
 
   // Estados de autenticación
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
   const [currentUser, setCurrentUser] = useState(null);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [loginError, setLoginError] = useState('');
@@ -64,6 +66,7 @@ function App() {
       setActiveTab('tracking');
     }
   }, []);
+
 
   // HU3: Inicio de sesión mejorado
   const handleLogin = async (e) => {
@@ -348,6 +351,23 @@ function App() {
     }
   };
 
+  // Mostrar formulario de registro
+if (activeTab === "register") {
+  return (
+    <div className="App">
+      <header className="App-header">
+        <RegisterForm />
+        <button
+          onClick={() => setActiveTab("login")}
+          className="btn-back"
+        >
+          ← Volver al inicio de sesión
+        </button>
+      </header>
+    </div>
+  );
+}
+
   // PÁGINA DE LOGIN MEJORADA
   if (!isLoggedIn) {
     return (
@@ -415,6 +435,17 @@ function App() {
                   {isLoading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
                 </button>
               </form>
+              {/* Enlace para registrar usuario */}
+                <div className="register-link">
+                  <p>¿No tienes una cuenta?</p>
+                  <button
+                    className="btn-register"
+                    onClick={() => setActiveTab('register')}
+                    type="button"
+                  >
+                    Registrar usuario
+                  </button>
+                  </div>
 
               {/* Cuentas de prueba mejoradas */}
               <div className="test-accounts">
@@ -757,6 +788,5 @@ function App() {
     
   );
 }
-
 
 export default App;
