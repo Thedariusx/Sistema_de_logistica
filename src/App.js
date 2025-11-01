@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
+import UserManagement from "./componentes/UserManagement";
+
 
 function App() {
   // === TODOS LOS ESTADOS DEBEN ESTAR DENTRO DE LA FUNCIÓN App ===
@@ -975,6 +977,12 @@ function App() {
               )}
             </div>
           )}
+        {activeTab === "admin" && currentUser.role === "admin" && (
+  <div className="tab-content">
+    <h2>👥 Gestión de Usuarios</h2>
+    <UserManagement />
+  </div>
+)}
 
         {/* Las otras vistas (my-deliveries, my-packages, admin, info) permanecen igual */}
         {/* ... tu código existente para las otras pestañas ... */}
@@ -982,5 +990,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
