@@ -463,6 +463,7 @@ function App() {
                   {message}
                 </div>
               )}
+              
 
               <form onSubmit={handleLogin} className="login-form">
                 <div className="form-group">
@@ -646,76 +647,78 @@ function App() {
           </div>
         </div>
 
-        {/* Pestañas según el rol */}
-        <div className="tabs">
-          <button
-            className={activeTab === "tracking" ? "active" : ""}
-            onClick={() => setActiveTab("tracking")}
-          >
-            📦 Seguimiento
-          </button>
+ {/* Pestañas según el rol */}
+<div className="tabs">
+  <button
+    className={activeTab === "tracking" ? "active" : ""}
+    onClick={() => setActiveTab("tracking")}
+  >
+    📦 Seguimiento
+  </button>
 
-          {/* OPERARIO: Gestión completa */}
-          {(currentUser.role === "operator" ||
-            currentUser.role === "admin") && (
-            <button
-              className={activeTab === "management" ? "active" : ""}
-              onClick={() => {
-                setActiveTab("management");
-                getAllPackages();
-                getMessengers();
-              }}
-            >
-              ⚙️ Gestión Completa
-            </button>
-          )}
+  {/* OPERARIO o ADMIN: gestión completa */}
+  {["operator", "operario", "admin"].includes(
+    currentUser.role?.toLowerCase()
+  ) && (
+    <button
+      className={activeTab === "management" ? "active" : ""}
+      onClick={() => {
+        setActiveTab("management");
+        getAllPackages();
+        getMessengers();
+      }}
+    >
+      ⚙️ Gestión Completa
+    </button>
+  )}
 
-          {/* MENSAJERO: Solo sus envíos */}
-          {currentUser.role === "messenger" && (
-            <button
-              className={activeTab === "my-deliveries" ? "active" : ""}
-              onClick={() => {
-                setActiveTab("my-deliveries");
-                getMyDeliveries();
-              }}
-            >
-              🚗 Mis Entregas
-            </button>
-          )}
+  {/* MENSAJERO */}
+  {["messenger", "mensajero"].includes(currentUser.role?.toLowerCase()) && (
+    <button
+      className={activeTab === "my-deliveries" ? "active" : ""}
+      onClick={() => {
+        setActiveTab("my-deliveries");
+        getMyDeliveries();
+      }}
+    >
+      🚗 Mis Entregas
+    </button>
+  )}
 
-          {/* CLIENTE: Sus envíos */}
-          {currentUser.role === "client" && (
-            <button
-              className={activeTab === "my-packages" ? "active" : ""}
-              onClick={() => {
-                setActiveTab("my-packages");
-                getMyPackages();
-              }}
-            >
-              📋 Mis Envíos
-            </button>
-          )}
+  {/* CLIENTE */}
+  {["client", "cliente"].includes(currentUser.role?.toLowerCase()) && (
+    <button
+      className={activeTab === "my-packages" ? "active" : ""}
+      onClick={() => {
+        setActiveTab("my-packages");
+        getMyPackages();
+      }}
+    >
+      📋 Mis Envíos
+    </button>
+  )}
 
-          {/* ADMIN: Gestión de usuarios */}
-          {currentUser.role === "admin" && (
-            <button
-              className={activeTab === "admin" ? "active" : ""}
-              onClick={() => {
-                setActiveTab("admin");
-                getAllUsers();
-              }}
-            >
-              👥 Usuarios
-            </button>
-          )}
+  {/* ADMIN */}
+  {["admin"].includes(currentUser.role?.toLowerCase()) && (
+    <button
+      className={activeTab === "admin" ? "active" : ""}
+      onClick={() => {
+        setActiveTab("admin");
+        getAllUsers();
+      }}
+    >
+      👥 Usuarios
+    </button>
+  )}
 
-          <button
-            className={activeTab === "info" ? "active" : ""}
-            onClick={() => setActiveTab("info")}
-          >
-            ℹ️ Información
-          </button>
-        </div>
+  <button
+    className={activeTab === "info" ? "active" : ""}
+    onClick={() => setActiveTab("info")}
+  >
+    ℹ️ Información
+  </button>
+</div>
+
 
         {/* Mensajes del sistema */}
         {message && (
@@ -790,223 +793,144 @@ function App() {
           </div>
         )}
 
-        {/* === VISTA OPERARIO/ADMIN: GESTIÓN COMPLETA === */}
-        {activeTab === "management" &&
-          (currentUser.role === "operator" || currentUser.role === "admin") && (
-            <div className="tab-content">
-              <h2>⚙️ Gestión Completa de Envíos</h2>
-              <p>
-                <em>
-                  Vista de {currentUser.role} - Gestión de todos los envíos del
-                  sistema
-                </em>
-              </p>
+{/* === VISTA OPERARIO/ADMIN: GESTIÓN COMPLETA === */}
+{activeTab === "management" &&
+  ["operator", "operario", "admin"].includes(currentUser.role?.toLowerCase()) && (
+    <div className="tab-content">
+      <h2>⚙️ Gestión Completa de Envíos</h2>
+      <p>
+        <em>
+          Vista de {currentUser.role} - Gestión de todos los envíos del sistema
+        </em>
+      </p>
 
-              <div className="action-buttons">
-                <button
-                  onClick={() => {
-                    getAllPackages();
-                    getMessengers();
-                  }}
-                >
-                  🔄 Actualizar Lista
-                </button>
-                <button
-                  onClick={() => {
-                    setShowCreatePackage(true);
-                    getMessengers();
-                  }}
-                >
-                  ➕ Nuevo Envío
-                </button>
-              </div>
+      <div className="action-buttons">
+        <button
+          onClick={() => {
+            getAllPackages();
+            getMessengers();
+          }}
+        >
+          🔄 Actualizar Lista
+        </button>
+        <button
+          onClick={() => {
+            setShowCreatePackage(true);
+            getMessengers();
+          }}
+        >
+          ➕ Nuevo Envío
+        </button>
+      </div>
 
-              {/* Modal para crear nuevo envío */}
-              {showCreatePackage && (
-                <div className="modal-overlay">
-                  <div className="modal-content">
-                    <h3>📦 Crear Nuevo Envío</h3>
-
-                    <div className="form-group">
-                      <label>Remitente *:</label>
-                      <input
-                        type="text"
-                        value={newPackage.sender_name}
-                        onChange={(e) =>
-                          setNewPackage({
-                            ...newPackage,
-                            sender_name: e.target.value,
-                          })
-                        }
-                        placeholder="Nombre del remitente"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Destinatario *:</label>
-                      <input
-                        type="text"
-                        value={newPackage.recipient_name}
-                        onChange={(e) =>
-                          setNewPackage({
-                            ...newPackage,
-                            recipient_name: e.target.value,
-                          })
-                        }
-                        placeholder="Nombre del destinatario"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Dirección de entrega *:</label>
-                      <input
-                        type="text"
-                        value={newPackage.delivery_address}
-                        onChange={(e) =>
-                          setNewPackage({
-                            ...newPackage,
-                            delivery_address: e.target.value,
-                          })
-                        }
-                        placeholder="Dirección completa"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Peso (kg):</label>
-                      <input
-                        type="number"
-                        value={newPackage.weight}
-                        onChange={(e) =>
-                          setNewPackage({
-                            ...newPackage,
-                            weight: e.target.value,
-                          })
-                        }
-                        placeholder="Peso en kilogramos"
-                        step="0.1"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Teléfono destinatario:</label>
-                      <input
-                        type="text"
-                        value={newPackage.recipient_phone}
-                        onChange={(e) =>
-                          setNewPackage({
-                            ...newPackage,
-                            recipient_phone: e.target.value,
-                          })
-                        }
-                        placeholder="Número de contacto"
-                      />
-                    </div>
-
-                    <div className="form-actions">
-                      <button onClick={createPackage}>✅ Crear Envío</button>
-                      <button onClick={() => setShowCreatePackage(false)}>
-                        ❌ Cancelar
-                      </button>
-                    </div>
-                  </div>
+      {/* Mostrar mensaje si no hay envíos */}
+      {allPackages.length === 0 ? (
+        <div className="card">
+          <p>⚠️ No hay envíos registrados en el sistema.</p>
+        </div>
+      ) : (
+        <div className="management-list">
+          <h3>📦 Todos los Envíos ({allPackages.length})</h3>
+          <div className="packages-grid">
+            {allPackages.map((pkg) => (
+              <div key={pkg.id} className="package-management-card card">
+                <div className="package-header">
+                  <h4>{pkg.tracking_code}</h4>
+                  <span
+                    className={`status ${pkg.status
+                      .toLowerCase()
+                      .replace(" ", "-")}`}
+                  >
+                    {pkg.status}
+                  </span>
                 </div>
-              )}
+                <p><strong>De:</strong> {pkg.sender_name}</p>
+                <p><strong>Para:</strong> {pkg.recipient_name}</p>
+                <p><strong>Dirección:</strong> {pkg.delivery_address}</p>
+                <p><strong>Cliente:</strong> {pkg.client_name || "No asignado"}</p>
+                {pkg.messenger_name && (
+                  <p><strong>Mensajero:</strong> {pkg.messenger_name}</p>
+                )}
 
-              {allPackages.length > 0 ? (
-                <div className="management-list">
-                  <h3>📦 Todos los Envíos ({allPackages.length})</h3>
-                  <div className="packages-grid">
-                    {allPackages.map((pkg) => (
-                      <div
-                        key={pkg.id}
-                        className="package-management-card card"
-                      >
-                        <div className="package-header">
-                          <h4>{pkg.tracking_code}</h4>
-                          <span
-                            className={`status ${pkg.status
-                              .toLowerCase()
-                              .replace(" ", "-")}`}
-                          >
-                            {pkg.status}
-                          </span>
-                        </div>
-                        <p>
-                          <strong>De:</strong> {pkg.sender_name}
-                        </p>
-                        <p>
-                          <strong>Para:</strong> {pkg.recipient_name}
-                        </p>
-                        <p>
-                          <strong>Dirección:</strong> {pkg.delivery_address}
-                        </p>
-                        <p>
-                          <strong>Cliente:</strong>{" "}
-                          {pkg.client_name || "No asignado"}
-                        </p>
-                        {pkg.messenger_name && (
-                          <p>
-                            <strong>Mensajero:</strong> {pkg.messenger_name}
-                          </p>
-                        )}
-
-                        {/* Selector para asignar mensajero */}
-                        <div className="form-group">
-                          <label>Asignar mensajero:</label>
-                          <select
-                            className="messenger-select"
-                            onChange={(e) =>
-                              assignMessenger(pkg.id, e.target.value)
-                            }
-                            defaultValue=""
-                          >
-                            <option value="">Seleccionar mensajero</option>
-                            {messengers.map((messenger) => (
-                              <option key={messenger.id} value={messenger.id}>
-                                {messenger.first_name} {messenger.last_name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="package-actions">
-                          <button
-                            onClick={() =>
-                              updatePackageStatus(pkg.id, "in_transit")
-                            }
-                          >
-                            🚚 En Tránsito
-                          </button>
-                          <button
-                            onClick={() =>
-                              updatePackageStatus(pkg.id, "out_for_delivery")
-                            }
-                          >
-                            📦 En Entrega
-                          </button>
-                          <button
-                            onClick={() =>
-                              updatePackageStatus(pkg.id, "delivered")
-                            }
-                          >
-                            ✅ Entregado
-                          </button>
-                          <button onClick={() => generateQR(pkg.id)}>
-                            📱 Generar QR
-                          </button>
-                        </div>
-                      </div>
+                {/* Selector para asignar mensajero */}
+                <div className="form-group">
+                  <label>Asignar mensajero:</label>
+                  <select
+                    className="messenger-select"
+                    onChange={(e) => assignMessenger(pkg.id, e.target.value)}
+                    defaultValue=""
+                  >
+                    <option value="">Seleccionar mensajero</option>
+                    {messengers.map((messenger) => (
+                      <option key={messenger.id} value={messenger.id}>
+                        {messenger.first_name} {messenger.last_name}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
-              ) : (
-                <div className="card">
-                  <p>No hay envíos en el sistema.</p>
+
+                <div className="package-actions">
+                  <button onClick={() => updatePackageStatus(pkg.id, "in_transit")}>🚚 En Tránsito</button>
+                  <button onClick={() => updatePackageStatus(pkg.id, "out_for_delivery")}>📦 En Entrega</button>
+                  <button onClick={() => updatePackageStatus(pkg.id, "delivered")}>✅ Entregado</button>
+                  <button onClick={() => generateQR(pkg.id)}>📱 Generar QR</button>
                 </div>
-              )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )}
+
+          {/* === VISTA MENSAJERO: MIS ENTREGAS === */}
+{activeTab === "my-deliveries" && currentUser.role === "messenger" && (
+  <div className="tab-content">
+    <h2>🚗 Mis Entregas</h2>
+    {allPackages.length > 0 ? (
+      <div className="packages-grid">
+        {allPackages.map((pkg) => (
+          <div key={pkg.id} className="package-card card">
+            <h4>{pkg.tracking_code}</h4>
+            <p><strong>Cliente:</strong> {pkg.client_name}</p>
+            <p><strong>Dirección:</strong> {pkg.delivery_address}</p>
+            <p><strong>Estado:</strong> {pkg.status}</p>
+            <div className="package-actions">
+              <button onClick={() => updatePackageStatus(pkg.id, "in_transit")}>🚚 En tránsito</button>
+              <button onClick={() => updatePackageStatus(pkg.id, "out_for_delivery")}>📦 En entrega</button>
+              <button onClick={() => updatePackageStatus(pkg.id, "delivered")}>✅ Entregado</button>
             </div>
-          )}
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>No tienes entregas asignadas.</p>
+    )}
+  </div>
+)}
+
+{/* === VISTA CLIENTE: MIS ENVÍOS === */}
+{activeTab === "my-packages" && currentUser.role === "client" && (
+  <div className="tab-content">
+    <h2>📋 Mis Envíos</h2>
+    {allPackages.length > 0 ? (
+      <div className="packages-grid">
+        {allPackages.map((pkg) => (
+          <div key={pkg.id} className="package-card card">
+            <h4>{pkg.tracking_code}</h4>
+            <p><strong>Destinatario:</strong> {pkg.recipient_name}</p>
+            <p><strong>Dirección:</strong> {pkg.delivery_address}</p>
+            <p><strong>Estado:</strong> {pkg.status}</p>
+            <button onClick={() => generateQR(pkg.id)}>📱 Ver QR</button>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>No tienes envíos registrados.</p>
+    )}
+  </div>
+)}
+
         {activeTab === "admin" && currentUser.role === "admin" && (
   <div className="tab-content">
     <h2>👥 Gestión de Usuarios</h2>
