@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
+import logoFull from "./assets/logo_full.png";
+import logoIcon from "./assets/logo_icon.png";
 
 import UserManagement from "./componentes/UserManagement";
-import RegisterForm from './components/RegisterForm';
+import RegisterForm from "./components/RegisterForm";
 
 function App() {
   // === TODOS LOS ESTADOS DEBEN ESTAR DENTRO DE LA FUNCIÓN App ===
@@ -414,10 +416,7 @@ function App() {
       <div className="App">
         <header className="App-header">
           <RegisterForm />
-          <button
-            onClick={() => setActiveTab("login")}
-            className="btn-back"
-          >
+          <button onClick={() => setActiveTab("login")} className="btn-back">
             ← Volver al inicio de sesión
           </button>
         </header>
@@ -429,29 +428,23 @@ function App() {
   if (!isLoggedIn) {
     return (
       <div className="App">
-        <header className="App-header">
-          <div className="login-logo">
-            <h1>🚚 Logística Segura Urabá</h1>
-            <p>Sistema de Gestión Logística</p>
-          </div>
+        <div className="login-container">
+          <div className="login-wrapper">
+            <div className="login-logo">
+              <img
+                src={logoIcon}
+                alt="Logística Segura de Urabá"
+                className="app-logo"
+              />
+              <h1>Logística Segura de Urabá</h1>
+              <p>Entregamos confianza</p>
+            </div>
 
-          <div className="login-container">
             <div className="login-card">
               <div className="login-header">
                 <h2>🔐 Iniciar Sesión</h2>
                 <p>Accede a tu cuenta</p>
               </div>
-
-              {/* Mensaje de error del servidor */}
-              {loginError && loginError.includes("servidor") && (
-                <div className="error-message server-error">
-                  <strong>Error interno del servidor</strong>
-                  <p>
-                    Estamos experimentando problemas técnicos. Por favor,
-                    intente nuevamente.
-                  </p>
-                </div>
-              )}
 
               {/* Mensajes del sistema */}
               {message && (
@@ -463,7 +456,6 @@ function App() {
                   {message}
                 </div>
               )}
-              
 
               <form onSubmit={handleLogin} className="login-form">
                 <div className="form-group">
@@ -498,6 +490,7 @@ function App() {
 
                 <button
                   type="button"
+                  className="btn-generate-token"
                   onClick={async () => {
                     if (!loginData.email || loginData.email.trim() === "") {
                       setMessage(
@@ -520,8 +513,7 @@ function App() {
 
                       if (response.ok) {
                         setMessage(
-                          `✅ Se ha generado un token temporal para ${loginData.email}. 
-          Revisa la consola del servidor para obtener el código.`
+                          `✅ Se ha generado un token temporal para ${loginData.email}. Revisa la consola del servidor para obtener el código.`
                         );
                       } else {
                         setMessage(`❌ ${data.error}`);
@@ -554,7 +546,7 @@ function App() {
 
                 <button
                   type="submit"
-                  className={`btn-login ${isLoading ? "loading" : ""}`}
+                  className="btn-login"
                   disabled={isLoading}
                 >
                   {isLoading ? "Iniciando Sesión..." : "Iniciar Sesión"}
@@ -566,7 +558,7 @@ function App() {
                 <p>¿No tienes una cuenta?</p>
                 <button
                   className="btn-register"
-                  onClick={() => setActiveTab('register')}
+                  onClick={() => setActiveTab("register")}
                   type="button"
                 >
                   Registrar usuario
@@ -611,21 +603,9 @@ function App() {
                   </p>
                 </div>
               </div>
-
-              {/* Información de ayuda */}
-              <div className="login-help">
-                <p>
-                  <strong>¿Problemas para acceder?</strong>
-                </p>
-                <ul>
-                  <li>Verifica tu conexión a internet</li>
-                  <li>Asegúrate de que el servidor esté ejecutándose</li>
-                  <li>Utiliza una de las cuentas de prueba</li>
-                </ul>
-              </div>
             </div>
           </div>
-        </header>
+        </div>
       </div>
     );
   }
@@ -633,93 +613,113 @@ function App() {
   // APLICACIÓN PRINCIPAL (cuando está logueado) - VISTAS POR ROL
   return (
     <div className="App">
-      <header className="App-header">
+      {/* PANEL SUPERIOR ELEGANTE */}
+      <div className="app-header-wrapper">
         <div className="user-header">
-          <h1>🚚 Logística Segura Urabá</h1>
+          <div className="header-left">
+           <img
+                src={logoIcon}
+                alt="Logística Segura de Urabá"
+                className="app-logo"
+              />
+            <div className="brand-section">
+              <h1>Logística Segura de Urabá</h1>
+              <p className="slogan">Entregamos confianza</p>
+            </div>
+          </div>
+
           <div className="user-info">
-            <span>
-              👤 {currentUser.first_name} {currentUser.last_name}
-              <span className="user-role">({currentUser.role})</span>
-            </span>
+            <div className="user-details">
+              <span className="user-name">
+                {currentUser.first_name} {currentUser.last_name}
+              </span>
+              <span className="user-role">{currentUser.role}</span>
+            </div>
             <button onClick={handleLogout} className="logout-btn">
               Cerrar Sesión
             </button>
           </div>
         </div>
+      </div>
 
- {/* Pestañas según el rol */}
-<div className="tabs">
-  <button
-    className={activeTab === "tracking" ? "active" : ""}
-    onClick={() => setActiveTab("tracking")}
-  >
-    📦 Seguimiento
-  </button>
+      {/* PESTAÑAS */}
+      <div className="tabs-container">
+        <div className="tabs">
+          <button
+            className={activeTab === "tracking" ? "active" : ""}
+            onClick={() => setActiveTab("tracking")}
+          >
+            📦 Seguimiento
+          </button>
 
-  {/* OPERARIO o ADMIN: gestión completa */}
-  {["operator", "operario", "admin"].includes(
-    currentUser.role?.toLowerCase()
-  ) && (
-    <button
-      className={activeTab === "management" ? "active" : ""}
-      onClick={() => {
-        setActiveTab("management");
-        getAllPackages();
-        getMessengers();
-      }}
-    >
-      ⚙️ Gestión Completa
-    </button>
-  )}
+          {/* OPERARIO o ADMIN: gestión completa */}
+          {["operator", "operario", "admin"].includes(
+            currentUser.role?.toLowerCase()
+          ) && (
+            <button
+              className={activeTab === "management" ? "active" : ""}
+              onClick={() => {
+                setActiveTab("management");
+                getAllPackages();
+                getMessengers();
+              }}
+            >
+              ⚙️ Gestión Completa
+            </button>
+          )}
 
-  {/* MENSAJERO */}
-  {["messenger", "mensajero"].includes(currentUser.role?.toLowerCase()) && (
-    <button
-      className={activeTab === "my-deliveries" ? "active" : ""}
-      onClick={() => {
-        setActiveTab("my-deliveries");
-        getMyDeliveries();
-      }}
-    >
-      🚗 Mis Entregas
-    </button>
-  )}
+          {/* MENSAJERO */}
+          {["messenger", "mensajero"].includes(
+            currentUser.role?.toLowerCase()
+          ) && (
+            <button
+              className={activeTab === "my-deliveries" ? "active" : ""}
+              onClick={() => {
+                setActiveTab("my-deliveries");
+                getMyDeliveries();
+              }}
+            >
+              🚗 Mis Entregas
+            </button>
+          )}
 
-  {/* CLIENTE */}
-  {["client", "cliente"].includes(currentUser.role?.toLowerCase()) && (
-    <button
-      className={activeTab === "my-packages" ? "active" : ""}
-      onClick={() => {
-        setActiveTab("my-packages");
-        getMyPackages();
-      }}
-    >
-      📋 Mis Envíos
-    </button>
-  )}
+          {/* CLIENTE */}
+          {["client", "cliente"].includes(currentUser.role?.toLowerCase()) && (
+            <button
+              className={activeTab === "my-packages" ? "active" : ""}
+              onClick={() => {
+                setActiveTab("my-packages");
+                getMyPackages();
+              }}
+            >
+              📋 Mis Envíos
+            </button>
+          )}
 
-  {/* ADMIN */}
-  {["admin"].includes(currentUser.role?.toLowerCase()) && (
-    <button
-      className={activeTab === "admin" ? "active" : ""}
-      onClick={() => {
-        setActiveTab("admin");
-        getAllUsers();
-      }}
-    >
-      👥 Usuarios
-    </button>
-  )}
+          {/* ADMIN */}
+          {["admin"].includes(currentUser.role?.toLowerCase()) && (
+            <button
+              className={activeTab === "admin" ? "active" : ""}
+              onClick={() => {
+                setActiveTab("admin");
+                getAllUsers();
+              }}
+            >
+              👥 Usuarios
+            </button>
+          )}
 
-  <button
-    className={activeTab === "info" ? "active" : ""}
-    onClick={() => setActiveTab("info")}
-  >
-    ℹ️ Información
-  </button>
-</div>
+          <button
+            className={activeTab === "info" ? "active" : ""}
+            onClick={() => setActiveTab("info")}
+          >
+            ℹ️ Información
+          </button>
+        </div>
+      </div>
 
-
+      {/* CONTENIDO PRINCIPAL */}
+      <div className="App-header">
         {/* Mensajes del sistema */}
         {message && (
           <div
@@ -793,158 +793,233 @@ function App() {
           </div>
         )}
 
-{/* === VISTA OPERARIO/ADMIN: GESTIÓN COMPLETA === */}
-{activeTab === "management" &&
-  ["operator", "operario", "admin"].includes(currentUser.role?.toLowerCase()) && (
-    <div className="tab-content">
-      <h2>⚙️ Gestión Completa de Envíos</h2>
-      <p>
-        <em>
-          Vista de {currentUser.role} - Gestión de todos los envíos del sistema
-        </em>
-      </p>
+        {/* === VISTA OPERARIO/ADMIN: GESTIÓN COMPLETA === */}
+        {activeTab === "management" &&
+          ["operator", "operario", "admin"].includes(
+            currentUser.role?.toLowerCase()
+          ) && (
+            <div className="tab-content">
+              <h2>⚙️ Gestión Completa de Envíos</h2>
+              <p>
+                <em>
+                  Vista de {currentUser.role} - Gestión de todos los envíos del
+                  sistema
+                </em>
+              </p>
 
-      <div className="action-buttons">
-        <button
-          onClick={() => {
-            getAllPackages();
-            getMessengers();
-          }}
-        >
-          🔄 Actualizar Lista
-        </button>
-        <button
-          onClick={() => {
-            setShowCreatePackage(true);
-            getMessengers();
-          }}
-        >
-          ➕ Nuevo Envío
-        </button>
-      </div>
-
-      {/* Mostrar mensaje si no hay envíos */}
-      {allPackages.length === 0 ? (
-        <div className="card">
-          <p>⚠️ No hay envíos registrados en el sistema.</p>
-        </div>
-      ) : (
-        <div className="management-list">
-          <h3>📦 Todos los Envíos ({allPackages.length})</h3>
-          <div className="packages-grid">
-            {allPackages.map((pkg) => (
-              <div key={pkg.id} className="package-management-card card">
-                <div className="package-header">
-                  <h4>{pkg.tracking_code}</h4>
-                  <span
-                    className={`status ${pkg.status
-                      .toLowerCase()
-                      .replace(" ", "-")}`}
-                  >
-                    {pkg.status}
-                  </span>
-                </div>
-                <p><strong>De:</strong> {pkg.sender_name}</p>
-                <p><strong>Para:</strong> {pkg.recipient_name}</p>
-                <p><strong>Dirección:</strong> {pkg.delivery_address}</p>
-                <p><strong>Cliente:</strong> {pkg.client_name || "No asignado"}</p>
-                {pkg.messenger_name && (
-                  <p><strong>Mensajero:</strong> {pkg.messenger_name}</p>
-                )}
-
-                {/* Selector para asignar mensajero */}
-                <div className="form-group">
-                  <label>Asignar mensajero:</label>
-                  <select
-                    className="messenger-select"
-                    onChange={(e) => assignMessenger(pkg.id, e.target.value)}
-                    defaultValue=""
-                  >
-                    <option value="">Seleccionar mensajero</option>
-                    {messengers.map((messenger) => (
-                      <option key={messenger.id} value={messenger.id}>
-                        {messenger.first_name} {messenger.last_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="package-actions">
-                  <button onClick={() => updatePackageStatus(pkg.id, "in_transit")}>🚚 En Tránsito</button>
-                  <button onClick={() => updatePackageStatus(pkg.id, "out_for_delivery")}>📦 En Entrega</button>
-                  <button onClick={() => updatePackageStatus(pkg.id, "delivered")}>✅ Entregado</button>
-                  <button onClick={() => generateQR(pkg.id)}>📱 Generar QR</button>
-                </div>
+              <div className="action-buttons">
+                <button
+                  onClick={() => {
+                    getAllPackages();
+                    getMessengers();
+                  }}
+                >
+                  🔄 Actualizar Lista
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCreatePackage(true);
+                    getMessengers();
+                  }}
+                >
+                  ➕ Nuevo Envío
+                </button>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )}
 
-          {/* === VISTA MENSAJERO: MIS ENTREGAS === */}
-{activeTab === "my-deliveries" && currentUser.role === "messenger" && (
-  <div className="tab-content">
-    <h2>🚗 Mis Entregas</h2>
-    {allPackages.length > 0 ? (
-      <div className="packages-grid">
-        {allPackages.map((pkg) => (
-          <div key={pkg.id} className="package-card card">
-            <h4>{pkg.tracking_code}</h4>
-            <p><strong>Cliente:</strong> {pkg.client_name}</p>
-            <p><strong>Dirección:</strong> {pkg.delivery_address}</p>
-            <p><strong>Estado:</strong> {pkg.status}</p>
-            <div className="package-actions">
-              <button onClick={() => updatePackageStatus(pkg.id, "in_transit")}>🚚 En tránsito</button>
-              <button onClick={() => updatePackageStatus(pkg.id, "out_for_delivery")}>📦 En entrega</button>
-              <button onClick={() => updatePackageStatus(pkg.id, "delivered")}>✅ Entregado</button>
+              {/* Mostrar mensaje si no hay envíos */}
+              {allPackages.length === 0 ? (
+                <div className="card">
+                  <p>⚠️ No hay envíos registrados en el sistema.</p>
+                </div>
+              ) : (
+                <div className="management-list">
+                  <h3>📦 Todos los Envíos ({allPackages.length})</h3>
+                  <div className="packages-grid">
+                    {allPackages.map((pkg) => (
+                      <div
+                        key={pkg.id}
+                        className="package-management-card card"
+                      >
+                        <div className="package-header">
+                          <h4>{pkg.tracking_code}</h4>
+                          <span
+                            className={`status ${pkg.status
+                              .toLowerCase()
+                              .replace(" ", "-")}`}
+                          >
+                            {pkg.status}
+                          </span>
+                        </div>
+                        <p>
+                          <strong>De:</strong> {pkg.sender_name}
+                        </p>
+                        <p>
+                          <strong>Para:</strong> {pkg.recipient_name}
+                        </p>
+                        <p>
+                          <strong>Dirección:</strong> {pkg.delivery_address}
+                        </p>
+                        <p>
+                          <strong>Cliente:</strong>{" "}
+                          {pkg.client_name || "No asignado"}
+                        </p>
+                        {pkg.messenger_name && (
+                          <p>
+                            <strong>Mensajero:</strong> {pkg.messenger_name}
+                          </p>
+                        )}
+
+                        {/* Selector para asignar mensajero */}
+                        <div className="form-group">
+                          <label>Asignar mensajero:</label>
+                          <select
+                            className="messenger-select"
+                            onChange={(e) =>
+                              assignMessenger(pkg.id, e.target.value)
+                            }
+                            defaultValue=""
+                          >
+                            <option value="">Seleccionar mensajero</option>
+                            {messengers.map((messenger) => (
+                              <option key={messenger.id} value={messenger.id}>
+                                {messenger.first_name} {messenger.last_name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="package-actions">
+                          <button
+                            onClick={() =>
+                              updatePackageStatus(pkg.id, "in_transit")
+                            }
+                          >
+                            🚚 En Tránsito
+                          </button>
+                          <button
+                            onClick={() =>
+                              updatePackageStatus(pkg.id, "out_for_delivery")
+                            }
+                          >
+                            📦 En Entrega
+                          </button>
+                          <button
+                            onClick={() =>
+                              updatePackageStatus(pkg.id, "delivered")
+                            }
+                          >
+                            ✅ Entregado
+                          </button>
+                          <button onClick={() => generateQR(pkg.id)}>
+                            📱 Generar QR
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <p>No tienes entregas asignadas.</p>
-    )}
-  </div>
-)}
+          )}
 
-{/* === VISTA CLIENTE: MIS ENVÍOS === */}
-{activeTab === "my-packages" && currentUser.role === "client" && (
-  <div className="tab-content">
-    <h2>📋 Mis Envíos</h2>
-    {allPackages.length > 0 ? (
-      <div className="packages-grid">
-        {allPackages.map((pkg) => (
-          <div key={pkg.id} className="package-card card">
-            <h4>{pkg.tracking_code}</h4>
-            <p><strong>Destinatario:</strong> {pkg.recipient_name}</p>
-            <p><strong>Dirección:</strong> {pkg.delivery_address}</p>
-            <p><strong>Estado:</strong> {pkg.status}</p>
-            <button onClick={() => generateQR(pkg.id)}>📱 Ver QR</button>
+        {/* === VISTA MENSAJERO: MIS ENTREGAS === */}
+        {activeTab === "my-deliveries" && currentUser.role === "messenger" && (
+          <div className="tab-content">
+            <h2>🚗 Mis Entregas</h2>
+            {allPackages.length > 0 ? (
+              <div className="packages-grid">
+                {allPackages.map((pkg) => (
+                  <div key={pkg.id} className="package-card card">
+                    <h4>{pkg.tracking_code}</h4>
+                    <p>
+                      <strong>Cliente:</strong> {pkg.client_name}
+                    </p>
+                    <p>
+                      <strong>Dirección:</strong> {pkg.delivery_address}
+                    </p>
+                    <p>
+                      <strong>Estado:</strong> {pkg.status}
+                    </p>
+                    <div className="package-actions">
+                      <button
+                        onClick={() =>
+                          updatePackageStatus(pkg.id, "in_transit")
+                        }
+                      >
+                        🚚 En tránsito
+                      </button>
+                      <button
+                        onClick={() =>
+                          updatePackageStatus(pkg.id, "out_for_delivery")
+                        }
+                      >
+                        📦 En entrega
+                      </button>
+                      <button
+                        onClick={() => updatePackageStatus(pkg.id, "delivered")}
+                      >
+                        ✅ Entregado
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No tienes entregas asignadas.</p>
+            )}
           </div>
-        ))}
-      </div>
-    ) : (
-      <p>No tienes envíos registrados.</p>
-    )}
-  </div>
-)}
+        )}
+
+        {/* === VISTA CLIENTE: MIS ENVÍOS === */}
+        {activeTab === "my-packages" && currentUser.role === "client" && (
+          <div className="tab-content">
+            <h2>📋 Mis Envíos</h2>
+            {allPackages.length > 0 ? (
+              <div className="packages-grid">
+                {allPackages.map((pkg) => (
+                  <div key={pkg.id} className="package-card card">
+                    <h4>{pkg.tracking_code}</h4>
+                    <p>
+                      <strong>Destinatario:</strong> {pkg.recipient_name}
+                    </p>
+                    <p>
+                      <strong>Dirección:</strong> {pkg.delivery_address}
+                    </p>
+                    <p>
+                      <strong>Estado:</strong> {pkg.status}
+                    </p>
+                    <button onClick={() => generateQR(pkg.id)}>
+                      📱 Ver QR
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No tienes envíos registrados.</p>
+            )}
+          </div>
+        )}
 
         {activeTab === "admin" && currentUser.role === "admin" && (
-  <div className="tab-content">
-    <h2>👥 Gestión de Usuarios</h2>
-    <UserManagement />
-  </div>
-)}
+          <div className="tab-content">
+            <h2>👥 Gestión de Usuarios</h2>
+            <UserManagement />
+          </div>
+        )}
 
-        {/* Las otras vistas (my-deliveries, my-packages, admin, info) permanecen igual */}
-        {/* ... tu código existente para las otras pestañas ... */}
-        
-      </header>
+        {/* Las otras vistas (info) permanecen igual */}
+        {activeTab === "info" && (
+          <div className="tab-content">
+            <h2>ℹ️ Información del Sistema</h2>
+            <div className="card">
+              <h3>Logística Segura de Urabá</h3>
+              <p>Sistema de gestión de envíos y paquetes.</p>
+              <p>Versión 1.0.0</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-
 export default App;
