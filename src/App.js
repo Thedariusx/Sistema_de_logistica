@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import UserManagement from "./componentes/UserManagement";
 
+import UserManagement from "./componentes/UserManagement";
+import RegisterForm from './components/RegisterForm';
 
 function App() {
   // === TODOS LOS ESTADOS DEBEN ESTAR DENTRO DE LA FUNCIÓN App ===
@@ -407,6 +408,23 @@ function App() {
     }
   };
 
+  // Mostrar formulario de registro
+  if (activeTab === "register") {
+    return (
+      <div className="App">
+        <header className="App-header">
+          <RegisterForm />
+          <button
+            onClick={() => setActiveTab("login")}
+            className="btn-back"
+          >
+            ← Volver al inicio de sesión
+          </button>
+        </header>
+      </div>
+    );
+  }
+
   // PÁGINA DE LOGIN MEJORADA
   if (!isLoggedIn) {
     return (
@@ -541,6 +559,18 @@ function App() {
                   {isLoading ? "Iniciando Sesión..." : "Iniciar Sesión"}
                 </button>
               </form>
+
+              {/* Enlace para registrar usuario */}
+              <div className="register-link">
+                <p>¿No tienes una cuenta?</p>
+                <button
+                  className="btn-register"
+                  onClick={() => setActiveTab('register')}
+                  type="button"
+                >
+                  Registrar usuario
+                </button>
+              </div>
 
               {/* Cuentas de prueba mejoradas */}
               <div className="test-accounts">
@@ -986,6 +1016,7 @@ function App() {
 
         {/* Las otras vistas (my-deliveries, my-packages, admin, info) permanecen igual */}
         {/* ... tu código existente para las otras pestañas ... */}
+        
       </header>
     </div>
   );

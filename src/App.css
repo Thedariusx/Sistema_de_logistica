@@ -856,3 +856,62 @@ button:active {
   margin-bottom: 5px;
 }
 }
+
+body {
+  background: linear-gradient(135deg, #6875F5, #6C63FF);
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+h1, h2 {
+  text-align: center;
+  color: white;
+}
+
+form {
+  background-color: rgba(255, 255, 255, 0.95);
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+input, select {
+  width: calc(25% - 10px);
+  margin: 5px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  display: block;
+  margin: 1rem auto;
+  padding: 10px 25px;
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #2563EB;
+}
+
+.back-btn {
+  display: block;
+  text-align: center;
+  background-color: #60A5FA;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  width: fit-content;
+  margin: 0 auto;
+}
