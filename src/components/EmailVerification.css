@@ -1,0 +1,110 @@
+.verification-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.verification-card {
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+}
+
+.verification-card h2 {
+  color: #2563eb;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.verification-info {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  border-left: 4px solid #2563eb;
+}
+
+.verification-info p {
+  margin: 10px 0;
+  color: #4b5563;
+}
+
+.resend-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 25px;
+}
+
+.resend-section h3 {
+  color: #374151;
+  margin-bottom: 15px;
+}
+
+.email-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.email-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.resend-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.resend-button:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.resend-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.message {
+  padding: 12px;
+  border-radius: 5px;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.message.success {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.message.error {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.help-text {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}

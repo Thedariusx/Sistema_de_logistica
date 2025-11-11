@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import logoFull from "./assets/logo_full.png";
 import logoIcon from "./assets/logo_icon.png";
 
 import UserManagement from "./componentes/UserManagement";
 import RegisterForm from "./components/RegisterForm";
+import EmailVerification from "./components/EmailVerification";
+import VerifyEmailPage from "./components/VerifyEmailPage";
 
-function App() {
-  // === TODOS LOS ESTADOS DEBEN ESTAR DENTRO DE LA FUNCIÓN App ===
+// Componente principal que usa las rutas
+function MainApp() {
   const [message, setMessage] = useState("");
   const [trackingData, setTrackingData] = useState(null);
   const [trackingCode, setTrackingCode] = useState("");
   const [activeTab, setActiveTab] = useState("login");
   const [allPackages, setAllPackages] = useState([]);
   const [users, setUsers] = useState([]);
+  
   const generateQR = (packageId) => {
     window.open(`http://localhost:3001/api/packages/${packageId}/qr`, "_blank");
   };
@@ -39,6 +43,11 @@ function App() {
   });
   const [loginError, setLoginError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [requiresToken, setRequiresToken] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Cuentas de prueba para acceso rápido
   const demoAccounts = [
@@ -72,18 +81,95 @@ function App() {
       setCurrentUser(JSON.parse(user));
       setActiveTab("tracking");
     }
-  }, []);
 
-  // HU3: Inicio de sesión mejorado
+    // Verificar si hay token de verificación en la URL
+    const urlParams = new URLSearchParams(location.search);
+    const verificationToken = urlParams.get('verification_token');
+    
+    if (verificationToken && !isLoggedIn) {
+      navigate(`/verify-email/${verificationToken}`);
+    }
+  }, [isLoggedIn, location, navigate]);
+
+  // ✅ HU3: Inicio de sesión MEJORADO
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
 
+    console.log('🔐 Iniciando proceso de login...');
     setIsLoading(true);
     setLoginError("");
     setMessage("");
 
     try {
-      // 1️⃣ Validar el token con el backend temporal
+      const loginResponse = await fetch("http://localhost:3001/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: loginData.email,
+          password: loginData.password,
+          session_id: sessionId
+        }),
+      });
+
+      const loginDataResult = await loginResponse.json();
+      console.log('📡 Respuesta del login:', loginDataResult);
+
+      if (loginResponse.ok) {
+        console.log('✅ Login exitoso');
+
+        localStorage.setItem("token", loginDataResult.token);
+        localStorage.setItem("user", JSON.stringify(loginDataResult.user));
+
+        setIsLoggedIn(true);
+        setCurrentUser(loginDataResult.user);
+        setActiveTab("tracking");
+        setMessage(`✅ Bienvenido/a ${loginDataResult.user.first_name}!`);
+        setIsLoading(false);
+        return;
+      }
+
+      if (loginResponse.status === 403 && loginDataResult.requires_token) {
+        console.log('⚠️ Usuario no verificado - Requiere token');
+        
+        if (loginData.token) {
+          console.log('🔄 Token ingresado, verificando...');
+          await handleTokenVerification();
+          return;
+        }
+        
+        setRequiresToken(true);
+        setMessage('📧 Email no verificado. Genera un token temporal e ingrésalo para acceder.');
+        setIsLoading(false);
+        return;
+      }
+
+      if (loginResponse.status === 401) {
+        throw new Error(loginDataResult.error || 'Credenciales inválidas');
+      }
+
+      throw new Error(loginDataResult.error || 'Error en el servidor');
+
+    } catch (error) {
+      console.error('💥 Error en login:', error);
+      setLoginError(error.message);
+      setMessage(`❌ ${error.message}`);
+      setIsLoading(false);
+    }
+  };
+
+  // ✅ FUNCIÓN: Verificar token temporal
+  const handleTokenVerification = async () => {
+    if (!loginData.token) {
+      setMessage('❌ Ingresa el código de verificación');
+      return;
+    }
+
+    setIsLoading(true);
+    setMessage('');
+
+    try {
+      console.log('🔐 Verificando token temporal...');
+
       const verifyRes = await fetch("http://localhost:3001/api/verify-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -96,46 +182,55 @@ function App() {
       const verifyData = await verifyRes.json();
 
       if (!verifyRes.ok) {
-        setMessage(`❌ ${verifyData.error}`);
-        setIsLoading(false);
-        return;
+        throw new Error(verifyData.error || 'Código inválido');
       }
 
-      // ✅ Token válido
-      setMessage("✅ Acceso concedido, iniciando sesión...");
+      const newSessionId = verifyData.session_id;
+      setSessionId(newSessionId);
+      
+      setMessage('✅ Código verificado. Iniciando sesión...');
 
-      // 2️⃣ Luego de validar el token, procede al login normal
-      const response = await fetch("http://localhost:3001/api/auth/login", {
+      const loginResponse = await fetch("http://localhost:3001/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: loginData.email,
           password: loginData.password,
+          session_id: newSessionId
         }),
       });
 
-      const data = await response.json();
+      const loginDataResult = await loginResponse.json();
 
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Error en el servidor. Intenta nuevamente."
-        );
+      if (!loginResponse.ok) {
+        throw new Error(loginDataResult.error || 'Error en el login después de verificación');
       }
 
-      // Guardar token y usuario
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", loginDataResult.token);
+      localStorage.setItem("user", JSON.stringify(loginDataResult.user));
 
       setIsLoggedIn(true);
-      setCurrentUser(data.user);
+      setCurrentUser(loginDataResult.user);
       setActiveTab("tracking");
-      setMessage(`✅ Bienvenido/a ${data.user.first_name}!`);
+      setMessage(`✅ Bienvenido/a ${loginDataResult.user.first_name}!`);
+      setRequiresToken(false);
+
     } catch (error) {
-      console.error("Error de login:", error);
-      setLoginError(error.message);
+      console.error('💥 Error verificando token:', error);
       setMessage(`❌ ${error.message}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // ✅ FUNCIÓN: Manejar envío del formulario completo
+  const handleFormSubmit = async (e) => {
+    if (e) e.preventDefault();
+    
+    if (requiresToken && loginData.token) {
+      await handleTokenVerification();
+    } else {
+      await handleLogin(e);
     }
   };
 
@@ -144,8 +239,10 @@ function App() {
     setLoginData({
       email: account.email,
       password: account.password,
-      token: "", // Se limpia el token anterior
+      token: "",
     });
+    setRequiresToken(false);
+    setSessionId(null);
 
     setMessage(
       `✅ Cuenta ${account.role} cargada. Haz clic en "Iniciar Sesión"`
@@ -165,15 +262,33 @@ function App() {
       });
   };
 
-  // Cerrar sesión
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    setCurrentUser(null);
-    setActiveTab("login");
-    setLoginData({ email: "", password: "", token: "" });
-    setMessage("✅ Sesión cerrada exitosamente");
+  // ✅ Cerrar sesión - ACTUALIZADA
+  const handleLogout = async () => {
+    try {
+      if (currentUser?.email) {
+        await fetch("http://localhost:3001/api/auth/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: currentUser.email,
+          }),
+        });
+      }
+    } catch (error) {
+      console.error("Error en logout:", error);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setIsLoggedIn(false);
+      setCurrentUser(null);
+      setActiveTab("login");
+      setLoginData({ email: "", password: "", token: "" });
+      setRequiresToken(false);
+      setSessionId(null);
+      setMessage("✅ Sesión cerrada exitosamente. Para acceder nuevamente necesitarás generar un nuevo token si no estás verificado.");
+    }
   };
 
   // HU5: Consultar estado de envío
@@ -302,7 +417,7 @@ function App() {
       }
 
       setMessage("✅ Mensajero asignado exitosamente");
-      getAllPackages(); // Refrescar lista
+      getAllPackages();
     } catch (error) {
       setMessage(`❌ ${error.message}`);
     }
@@ -370,7 +485,6 @@ function App() {
         recipient_phone: "",
       });
 
-      // Actualizar lista
       if (activeTab === "management") getAllPackages();
     } catch (error) {
       setMessage(`❌ ${error.message}`);
@@ -401,7 +515,6 @@ function App() {
 
       setMessage(`✅ Estado actualizado a: ${newStatus}`);
 
-      // Actualizar la lista según la pestaña activa
       if (activeTab === "management") getAllPackages();
       if (activeTab === "my-deliveries") getMyDeliveries();
       if (activeTab === "my-packages") getMyPackages();
@@ -457,7 +570,17 @@ function App() {
                 </div>
               )}
 
-              <form onSubmit={handleLogin} className="login-form">
+              {/* ✅ NOTIFICACIÓN SI REQUIERE TOKEN */}
+              {requiresToken && (
+                <div className="token-notice">
+                  <h3>📧 Email No Verificado</h3>
+                  <p>Para acceder, genera un token temporal e ingrésalo abajo:</p>
+                  <p><small>⚠️ Este token es temporal y se invalidará al cerrar sesión</small></p>
+                </div>
+              )}
+
+              {/* ✅ FORMULARIO ÚNICO CON TODOS LOS CAMPOS */}
+              <form onSubmit={handleFormSubmit} className="login-form">
                 <div className="form-group">
                   <label htmlFor="email">Correo electrónico</label>
                   <input
@@ -488,6 +611,7 @@ function App() {
                   />
                 </div>
 
+                {/* ✅ BOTÓN PARA GENERAR TOKEN */}
                 <button
                   type="button"
                   className="btn-generate-token"
@@ -513,15 +637,16 @@ function App() {
 
                       if (response.ok) {
                         setMessage(
-                          `✅ Se ha generado un token temporal para ${loginData.email}. Revisa la consola del servidor para obtener el código.`
+                          `✅ Token generado para ${loginData.email}: ${data.token} (Expira en 2 minutos)`
                         );
+                        setRequiresToken(true);
+                        
+                        setLoginData({ ...loginData, token: data.token });
                       } else {
                         setMessage(`❌ ${data.error}`);
                       }
                     } catch (error) {
-                      setMessage(
-                        "❌ Error generando token. Verifica la conexión al servidor."
-                      );
+                      setMessage("❌ Error generando token. Verifica la conexión al servidor.");
                     }
                   }}
                   disabled={isLoading}
@@ -529,8 +654,11 @@ function App() {
                   🔑 Generar Token Temporal
                 </button>
 
+                {/* ✅ CAMPO DE TOKEN (SIEMPRE VISIBLE) */}
                 <div className="form-group">
-                  <label htmlFor="token">Código de autenticación</label>
+                  <label htmlFor="token">
+                    Código de verificación {requiresToken && <span style={{color: 'red'}}>*</span>}
+                  </label>
                   <input
                     id="token"
                     type="text"
@@ -539,9 +667,13 @@ function App() {
                     onChange={(e) =>
                       setLoginData({ ...loginData, token: e.target.value })
                     }
-                    required
                     disabled={isLoading}
                   />
+                  {requiresToken && (
+                    <small style={{color: '#666', fontSize: '0.8rem'}}>
+                      * Requerido para usuarios no verificados
+                    </small>
+                  )}
                 </div>
 
                 <button
@@ -610,7 +742,7 @@ function App() {
     );
   }
 
-  // APLICACIÓN PRINCIPAL (cuando está logueado) - VISTAS POR ROL
+  // APLICACIÓN PRINCIPAL (cuando está logueado)
   return (
     <div className="App">
       {/* PANEL SUPERIOR ELEGANTE */}
@@ -634,6 +766,9 @@ function App() {
                 {currentUser.first_name} {currentUser.last_name}
               </span>
               <span className="user-role">{currentUser.role}</span>
+              {!currentUser.is_email_verified && (
+                <span className="user-temp-session">🔐 Sesión Temporal</span>
+              )}
             </div>
             <button onClick={handleLogout} className="logout-btn">
               Cerrar Sesión
@@ -1022,4 +1157,20 @@ function App() {
     </div>
   );
 }
+
+// Componente principal que envuelve todo con Router
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Ruta para verificación de email */}
+        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+        
+        {/* Ruta principal - maneja toda la lógica de la app */}
+        <Route path="*" element={<MainApp />} />
+      </Routes>
+    </Router>
+  );
+}
+
 export default App;

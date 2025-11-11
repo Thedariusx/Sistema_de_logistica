@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import '../App.css';
-import logoIcon from '../assets/logo_icon.png'; // Asegúrate de que esta ruta sea correcta
+import logoIcon from '../assets/logo_icon.png';
 
-export default function RegisterForm() {
+export default function RegisterForm(props) { // ✅ AGREGAR props como parámetro
   const [form, setForm] = useState({
     first_name: "",
     second_name: "",
@@ -31,13 +31,20 @@ export default function RegisterForm() {
       });
 
       const data = await response.json();
-
+      
       if (!response.ok) {
         alert(`❌ Error: ${data.error || "No se pudo registrar el usuario"}`);
         return;
       }
 
-      alert(`✅ Usuario registrado correctamente: ${data.user.first_name}`);
+      // ✅ REGISTRO EXITOSO - LLAMAR A LA FUNCIÓN DE VERIFICACIÓN
+      if (props.onRegistrationSuccess) {
+        props.onRegistrationSuccess(form.email); // ✅ CAMBIAR formData.email por form.email
+      }
+
+      alert(`✅ Usuario registrado correctamente: ${data.user?.first_name || form.first_name}`);
+      
+      // Limpiar formulario
       setForm({
         first_name: "",
         second_name: "",
@@ -50,6 +57,7 @@ export default function RegisterForm() {
         role: "user",
         password: "",
       });
+      
     } catch (error) {
       console.error("Error de conexión:", error);
       alert("Error al conectar con el servidor.");
