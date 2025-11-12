@@ -129,7 +129,7 @@ export default function RegisterForm(props) { // ✅ AGREGAR props como parámet
                   onChange={handleChange} 
                 />
               </div>
-            </div>
+            </div> 
 
             {/* Tercera fila - Documento y Email */}
             <div className="form-row">

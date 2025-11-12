@@ -1444,13 +1444,11 @@ function MainApp() {
             <ReportesComponent packages={allPackages} messengers={messengers} />
           </div>
         )}
-
-        {activeTab === "admin" && currentUser.role === "admin" && (
-          <div className="tab-content">
-            <h2>👥 Gestión de Usuarios</h2>
-            <UserManagement />
-          </div>
-        )}
+{activeTab === "admin" && currentUser.role?.toLowerCase() === "admin" && (
+  <div className="tab-content">
+    <UserManagement />
+  </div>
+)}
 
         {/* Las otras vistas (info) permanecen igual */}
         {activeTab === "info" && (

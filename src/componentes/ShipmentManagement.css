@@ -354,4 +354,15 @@
     flex-direction: column;
     align-items: flex-start;
   }
+  /* Agregar esto a tu UserManagement.css */
+
+.error-message {
+  border-left-color: #e74c3c !important;
+  background: #fdecea !important;
+}
+
+.success-message {
+  border-left-color: #27ae60 !important;
+  background: #eafaf1 !important;
+}
 }
