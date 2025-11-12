@@ -5,9 +5,275 @@ import logoFull from "./assets/logo_full.png";
 import logoIcon from "./assets/logo_icon.png";
 
 import UserManagement from "./componentes/UserManagement";
-import RegisterForm from "./components/RegisterForm";
-import EmailVerification from "./components/EmailVerification";
-import VerifyEmailPage from "./components/VerifyEmailPage";
+import ShipmentManagement from "./componentes/ShipmentManagement";
+import RegisterForm from "./componentes/RegisterForm";
+import EmailVerification from "./componentes/EmailVerification";
+import VerifyEmailPage from "./componentes/VerifyEmailPage";
+// Componente de Reportes
+const ReportesComponent = ({ packages, messengers }) => {
+  const [tipoReporte, setTipoReporte] = useState('envios-por-estado');
+  const [reporteData, setReporteData] = useState(null);
+
+  const generarReporte = () => {
+    let datos = {};
+    
+    switch(tipoReporte) {
+      case 'envios-por-estado':
+        datos = packages.reduce((acc, pkg) => {
+          const estado = pkg.status || 'registered';
+          const estadoTraducido = {
+            'registered': 'Registrado',
+            'approved': 'Aprobado',
+            'rejected': 'Rechazado',
+            'in_transit': 'En Tránsito',
+            'out_for_delivery': 'En Entrega',
+            'delivered': 'Entregado',
+            'cancelled': 'Cancelado'
+          }[estado] || estado;
+          
+          acc[estadoTraducido] = (acc[estadoTraducido] || 0) + 1;
+          return acc;
+        }, {});
+        break;
+      
+      case 'envios-por-mensajero':
+        datos = packages.reduce((acc, pkg) => {
+          const mensajero = pkg.messenger_name || 'No asignado';
+          acc[mensajero] = (acc[mensajero] || 0) + 1;
+          return acc;
+        }, {});
+        break;
+      
+      case 'envios-por-ciudad':
+        datos = packages.reduce((acc, pkg) => {
+          const ciudad = pkg.tracking_code.split('-')[0] || 'Desconocida';
+          acc[ciudad] = (acc[ciudad] || 0) + 1;
+          return acc;
+        }, {});
+        break;
+      
+      default:
+        datos = {};
+    }
+    
+    setReporteData({
+      tipo: tipoReporte,
+      datos: datos,
+      total: packages.length,
+      fecha: new Date().toLocaleDateString('es-ES', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    });
+  };
+
+  const exportarReporte = () => {
+    if (!reporteData) return;
+    
+    const contenido = `REPORTE DE ENVÍOS - LOGÍSTICA SEGURA URABÁ\n` +
+      `Fecha: ${reporteData.fecha}\n` +
+      `Tipo: ${reporteData.tipo.replace(/-/g, ' ').toUpperCase()}\n` +
+      `Total de envíos: ${reporteData.total}\n\n` +
+      'DETALLES:\n' +
+      Object.entries(reporteData.datos).map(([key, value]) => 
+        `${key}: ${value} (${((value/reporteData.total)*100).toFixed(1)}%)`
+      ).join('\n') +
+      `\n\nGenerado automáticamente por el Sistema de Logística Urabá`;
+    
+    const blob = new Blob([contenido], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reporte-envios-${reporteData.fecha.replace(/\s/g, '-')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const getTituloReporte = () => {
+    const titulos = {
+      'envios-por-estado': 'Envíos por Estado',
+      'envios-por-mensajero': 'Envíos por Mensajero',
+      'envios-por-ciudad': 'Envíos por Ciudad'
+    };
+    return titulos[tipoReporte] || 'Reporte de Envíos';
+  };
+
+  return (
+    <div className="reportes-container">
+      <div className="reportes-header">
+        <h2>📊 Reportes Analíticos</h2>
+        <p>Análisis detallado del rendimiento de envíos</p>
+      </div>
+      
+      <div className="reporte-controls">
+        <div className="control-group">
+          <label>Tipo de Reporte:</label>
+          <select 
+            value={tipoReporte} 
+            onChange={(e) => setTipoReporte(e.target.value)}
+            className="reporte-select"
+          >
+            <option value="envios-por-estado">Envíos por Estado</option>
+            <option value="envios-por-mensajero">Envíos por Mensajero</option>
+            <option value="envios-por-ciudad">Envíos por Ciudad</option>
+          </select>
+        </div>
+        
+        <button onClick={generarReporte} className="btn-generar">
+          🚀 Generar Reporte
+        </button>
+      </div>
+
+      {reporteData && (
+        <div className="reporte-resultado">
+          <div className="reporte-header">
+            <div>
+              <h3>{getTituloReporte()}</h3>
+              <span className="reporte-fecha">{reporteData.fecha}</span>
+            </div>
+            <button onClick={exportarReporte} className="btn-exportar">
+              📥 Exportar PDF
+            </button>
+          </div>
+          
+          <div className="reporte-resumen">
+            <div className="resumen-total">
+              <span className="total-numero">{reporteData.total}</span>
+              <span className="total-label">Total de Envíos</span>
+            </div>
+          </div>
+          
+          <div className="reporte-datos">
+            {Object.entries(reporteData.datos).map(([key, value]) => (
+              <div key={key} className="reporte-item">
+                <div className="reporte-info">
+                  <span className="reporte-label">{key}</span>
+                  <span className="reporte-value">{value} envíos</span>
+                </div>
+                <div className="reporte-bar">
+                  <div 
+                    className="reporte-progress" 
+                    style={{ width: `${(value/reporteData.total)*100}%` }}
+                  ></div>
+                </div>
+                <span className="reporte-porcentaje">
+                  {(value/reporteData.total*100).toFixed(1)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Componente para crear nuevo envío - SOLO PARA CLIENTES
+const CrearEnvioComponent = ({ onSubmit, onCancel, currentUser }) => {
+  const [formData, setFormData] = useState({
+    sender_name: "",
+    recipient_name: "",
+    delivery_address: "",
+    weight: "",
+    recipient_phone: "",
+    package_description: "",
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <div className="crear-envio-modal">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h3>📦 Crear Nuevo Envío</h3>
+          <button onClick={onCancel} className="btn-close">×</button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="envio-form">
+          <div className="form-group">
+            <label>Remitente *</label>
+            <input
+              type="text"
+              value={formData.sender_name}
+              onChange={(e) => setFormData({...formData, sender_name: e.target.value})}
+              placeholder="Nombre completo del remitente"
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label>Destinatario *</label>
+            <input
+              type="text"
+              value={formData.recipient_name}
+              onChange={(e) => setFormData({...formData, recipient_name: e.target.value})}
+              placeholder="Nombre completo del destinatario"
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label>Dirección de entrega *</label>
+            <textarea
+              value={formData.delivery_address}
+              onChange={(e) => setFormData({...formData, delivery_address: e.target.value})}
+              placeholder="Dirección completa para la entrega"
+              required
+              rows="3"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Descripción del paquete *</label>
+            <textarea
+              value={formData.package_description}
+              onChange={(e) => setFormData({...formData, package_description: e.target.value})}
+              placeholder="Describe qué contiene el paquete (ej: Documentos importantes, Ropa, Electrónicos, etc.)"
+              required
+              rows="3"
+            />
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label>Peso (kg)</label>
+              <input
+                type="number"
+                step="0.1"
+                value={formData.weight}
+                onChange={(e) => setFormData({...formData, weight: e.target.value})}
+                placeholder="0.0"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>Teléfono destinatario</label>
+              <input
+                type="tel"
+                value={formData.recipient_phone}
+                onChange={(e) => setFormData({...formData, recipient_phone: e.target.value})}
+                placeholder="+57 300 123 4567"
+              />
+            </div>
+          </div>
+          
+          <div className="form-actions">
+            <button type="button" onClick={onCancel} className="btn-cancel">
+              Cancelar
+            </button>
+            <button type="submit" className="btn-submit">
+              🚀 Crear Envío
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 // Componente principal que usa las rutas
 function MainApp() {
@@ -18,11 +284,6 @@ function MainApp() {
   const [allPackages, setAllPackages] = useState([]);
   const [users, setUsers] = useState([]);
   
-  const generateQR = (packageId) => {
-    window.open(`http://localhost:3001/api/packages/${packageId}/qr`, "_blank");
-  };
-
-  // === NUEVOS ESTADOS PARA FASE 3 ===
   const [messengers, setMessengers] = useState([]);
   const [showCreatePackage, setShowCreatePackage] = useState(false);
   const [newPackage, setNewPackage] = useState({
@@ -31,6 +292,7 @@ function MainApp() {
     delivery_address: "",
     weight: "",
     recipient_phone: "",
+    package_description: "",
   });
 
   // Estados de autenticación
@@ -90,6 +352,33 @@ function MainApp() {
       navigate(`/verify-email/${verificationToken}`);
     }
   }, [isLoggedIn, location, navigate]);
+
+  // Cargar datos automáticamente cuando cambia la pestaña
+  useEffect(() => {
+    if (isLoggedIn) {
+      switch(activeTab) {
+        case "management":
+          getAllPackages();
+          getMessengers();
+          break;
+        case "my-deliveries":
+          getMyDeliveries();
+          break;
+        case "my-packages":
+          getMyPackages();
+          break;
+        case "admin":
+          getAllUsers();
+          break;
+        default:
+          break;
+      }
+    }
+  }, [activeTab, isLoggedIn]);
+
+  const generateQR = (packageId) => {
+    window.open(`http://localhost:3001/api/packages/${packageId}/qr`, "_blank");
+  };
 
   // ✅ HU3: Inicio de sesión MEJORADO
   const handleLogin = async (e) => {
@@ -331,7 +620,6 @@ function MainApp() {
 
       const data = await response.json();
       setAllPackages(data);
-      setMessage(`✅ ${data.length} envíos cargados`);
     } catch (error) {
       setMessage("❌ Error obteniendo envíos");
     }
@@ -352,7 +640,7 @@ function MainApp() {
     }
   };
 
-  // ===== NUEVAS FUNCIONES PARA FASE 3 =====
+  // ===== NUEVAS FUNCIONES PARA GESTIÓN MEJORADA =====
 
   // Obtener entregas del mensajero actual
   const getMyDeliveries = async () => {
@@ -367,7 +655,6 @@ function MainApp() {
 
       const data = await response.json();
       setAllPackages(data);
-      setMessage(`✅ ${data.length} entregas cargadas`);
     } catch (error) {
       setMessage("❌ Error obteniendo tus entregas");
     }
@@ -386,40 +673,8 @@ function MainApp() {
 
       const data = await response.json();
       setAllPackages(data);
-      setMessage(`✅ ${data.length} envíos cargados`);
     } catch (error) {
       setMessage("❌ Error obteniendo tus envíos");
-    }
-  };
-
-  // HU7: Asignar mensajero a envío
-  const assignMessenger = async (packageId, messengerId) => {
-    if (!messengerId) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:3001/api/packages/${packageId}/assign-messenger`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ messenger_id: messengerId }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error asignando mensajero");
-      }
-
-      setMessage("✅ Mensajero asignado exitosamente");
-      getAllPackages();
-    } catch (error) {
-      setMessage(`❌ ${error.message}`);
     }
   };
 
@@ -428,7 +683,7 @@ function MainApp() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:3001/api/users?role=messenger",
+        "http://localhost:3001/api/users/role/messenger",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -441,18 +696,9 @@ function MainApp() {
     }
   };
 
-  // HU4: Crear nuevo envío
-  const createPackage = async () => {
+  // HU4: Crear nuevo envío - SOLO PARA CLIENTES
+  const createPackage = async (packageData) => {
     try {
-      if (
-        !newPackage.sender_name ||
-        !newPackage.recipient_name ||
-        !newPackage.delivery_address
-      ) {
-        setMessage("❌ Faltan campos obligatorios");
-        return;
-      }
-
       const token = localStorage.getItem("token");
       const response = await fetch(
         "http://localhost:3001/api/packages/register",
@@ -463,8 +709,12 @@ function MainApp() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            ...newPackage,
+            sender_name: packageData.sender_name,
+            recipient_name: packageData.recipient_name,
+            delivery_address: packageData.delivery_address,
+            weight: packageData.weight,
             client_id: currentUser.id,
+            package_description: packageData.package_description,
           }),
         }
       );
@@ -483,9 +733,11 @@ function MainApp() {
         delivery_address: "",
         weight: "",
         recipient_phone: "",
+        package_description: "",
       });
 
-      if (activeTab === "management") getAllPackages();
+      // Recargar la lista correspondiente
+      if (activeTab === "my-packages") getMyPackages();
     } catch (error) {
       setMessage(`❌ ${error.message}`);
     }
@@ -513,14 +765,77 @@ function MainApp() {
         throw new Error(data.error || "Error actualizando estado");
       }
 
-      setMessage(`✅ Estado actualizado a: ${newStatus}`);
+      setMessage(`✅ Estado actualizado a: ${traducirEstado(newStatus)}`);
 
+      // Recargar la lista correspondiente
       if (activeTab === "management") getAllPackages();
       if (activeTab === "my-deliveries") getMyDeliveries();
       if (activeTab === "my-packages") getMyPackages();
     } catch (error) {
       setMessage(`❌ ${error.message}`);
     }
+  };
+
+  // Eliminar envío
+  const deletePackage = async (packageId) => {
+    if (!window.confirm("¿Estás seguro de que quieres eliminar este envío? Esta acción no se puede deshacer.")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:3001/api/packages/${packageId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error eliminando envío");
+      }
+
+      setMessage("✅ Envío eliminado exitosamente");
+
+      // Recargar la lista correspondiente
+      if (activeTab === "management") getAllPackages();
+      if (activeTab === "my-packages") getMyPackages();
+    } catch (error) {
+      setMessage(`❌ ${error.message}`);
+    }
+  };
+
+  // Función para traducir estados
+  const traducirEstado = (estado) => {
+    const estados = {
+      'registered': 'Registrado',
+      'approved': 'Aprobado',
+      'rejected': 'Rechazado',
+      'in_transit': 'En Tránsito',
+      'out_for_delivery': 'En Entrega',
+      'delivered': 'Entregado',
+      'cancelled': 'Cancelado'
+    };
+    return estados[estado] || estado;
+  };
+
+  // Función para obtener clase CSS según estado
+  const getStatusClass = (status) => {
+    const statusClasses = {
+      'registered': 'status-registered',
+      'approved': 'status-approved',
+      'rejected': 'status-rejected',
+      'in_transit': 'status-transit',
+      'out_for_delivery': 'status-delivery',
+      'delivered': 'status-delivered',
+      'cancelled': 'status-cancelled'
+    };
+    return statusClasses[status] || 'status-default';
   };
 
   // Mostrar formulario de registro
@@ -793,11 +1108,7 @@ function MainApp() {
           ) && (
             <button
               className={activeTab === "management" ? "active" : ""}
-              onClick={() => {
-                setActiveTab("management");
-                getAllPackages();
-                getMessengers();
-              }}
+              onClick={() => setActiveTab("management")}
             >
               ⚙️ Gestión Completa
             </button>
@@ -809,10 +1120,7 @@ function MainApp() {
           ) && (
             <button
               className={activeTab === "my-deliveries" ? "active" : ""}
-              onClick={() => {
-                setActiveTab("my-deliveries");
-                getMyDeliveries();
-              }}
+              onClick={() => setActiveTab("my-deliveries")}
             >
               🚗 Mis Entregas
             </button>
@@ -822,10 +1130,7 @@ function MainApp() {
           {["client", "cliente"].includes(currentUser.role?.toLowerCase()) && (
             <button
               className={activeTab === "my-packages" ? "active" : ""}
-              onClick={() => {
-                setActiveTab("my-packages");
-                getMyPackages();
-              }}
+              onClick={() => setActiveTab("my-packages")}
             >
               📋 Mis Envíos
             </button>
@@ -835,12 +1140,21 @@ function MainApp() {
           {["admin"].includes(currentUser.role?.toLowerCase()) && (
             <button
               className={activeTab === "admin" ? "active" : ""}
-              onClick={() => {
-                setActiveTab("admin");
-                getAllUsers();
-              }}
+              onClick={() => setActiveTab("admin")}
             >
               👥 Usuarios
+            </button>
+          )}
+
+          {/* REPORTES para operarios y admin */}
+          {["operator", "operario", "admin"].includes(
+            currentUser.role?.toLowerCase()
+          ) && (
+            <button
+              className={activeTab === "reportes" ? "active" : ""}
+              onClick={() => setActiveTab("reportes")}
+            >
+              📊 Reportes
             </button>
           )}
 
@@ -866,232 +1180,247 @@ function MainApp() {
           </div>
         )}
 
+        {/* MODAL PARA CREAR ENVÍO - SOLO PARA CLIENTES */}
+        {showCreatePackage && ["client", "cliente"].includes(currentUser.role?.toLowerCase()) && (
+          <CrearEnvioComponent
+            onSubmit={createPackage}
+            onCancel={() => setShowCreatePackage(false)}
+            currentUser={currentUser}
+          />
+        )}
+
         {/* CONTENIDO SEGÚN ROL Y PESTAÑA */}
 
         {/* === VISTA PARA TODOS: SEGUIMIENTO === */}
         {activeTab === "tracking" && (
           <div className="tab-content">
-            <h2>🔍 Rastrea tu Envío</h2>
-
-            <div className="tracking-form">
-              <input
-                type="text"
-                placeholder="Ingresa código de seguimiento (ej: URABA-...)"
-                value={trackingCode}
-                onChange={(e) => setTrackingCode(e.target.value.toUpperCase())}
-                onKeyPress={(e) => e.key === "Enter" && trackPackage()}
-              />
-              <button onClick={trackPackage}>Buscar Envío</button>
+            <div className="section-header">
+              <h2>🔍 Rastrea tu Envío</h2>
+              <p>Consulta el estado actual de cualquier envío con su código de seguimiento</p>
             </div>
 
-            {trackingData && (
-              <div className="tracking-result">
-                <h3>📦 Información del Envío</h3>
-                <div className="tracking-details">
-                  <p>
-                    <strong>Código:</strong> {trackingData.tracking_code}
-                  </p>
-                  <p>
-                    <strong>Remitente:</strong> {trackingData.sender_name}
-                  </p>
-                  <p>
-                    <strong>Destinatario:</strong> {trackingData.recipient_name}
-                  </p>
-                  <p>
-                    <strong>Dirección:</strong> {trackingData.delivery_address}
-                  </p>
-                  <p>
-                    <strong>Estado:</strong>
-                    <span
-                      className={`status ${trackingData.status
-                        .toLowerCase()
-                        .replace(" ", "-")}`}
-                    >
-                      {trackingData.status}
-                    </span>
-                  </p>
-                  <p>
-                    <strong>Ubicación:</strong> {trackingData.current_location}
-                  </p>
-                  {trackingData.messenger_name && (
-                    <p>
-                      <strong>Mensajero:</strong> {trackingData.messenger_name}
-                    </p>
-                  )}
-                  <p>
-                    <strong>Costo:</strong> $
-                    {parseFloat(trackingData.cost).toLocaleString()}
-                  </p>
-                </div>
+            <div className="tracking-card">
+              <div className="tracking-form">
+                <input
+                  type="text"
+                  placeholder="Ingresa código de seguimiento (ej: URABA-...)"
+                  value={trackingCode}
+                  onChange={(e) => setTrackingCode(e.target.value.toUpperCase())}
+                  onKeyPress={(e) => e.key === "Enter" && trackPackage()}
+                />
+                <button onClick={trackPackage} className="btn-track">
+                  Buscar Envío
+                </button>
               </div>
-            )}
+
+              {trackingData && (
+                <div className="tracking-result">
+                  <h3>📦 Información del Envío</h3>
+                  <div className="tracking-details">
+                    <div className="detail-row">
+                      <span className="detail-label">Código:</span>
+                      <span className="detail-value">{trackingData.tracking_code}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Remitente:</span>
+                      <span className="detail-value">{trackingData.sender_name}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Destinatario:</span>
+                      <span className="detail-value">{trackingData.recipient_name}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Dirección:</span>
+                      <span className="detail-value">{trackingData.delivery_address}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Descripción:</span>
+                      <span className="detail-value">{trackingData.package_description || "No especificada"}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Estado:</span>
+                      <span className={`status ${getStatusClass(trackingData.status)}`}>
+                        {traducirEstado(trackingData.status)}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Ubicación:</span>
+                      <span className="detail-value">{trackingData.current_location}</span>
+                    </div>
+                    {trackingData.messenger_name && (
+                      <div className="detail-row">
+                        <span className="detail-label">Mensajero:</span>
+                        <span className="detail-value">{trackingData.messenger_name}</span>
+                      </div>
+                    )}
+                    <div className="detail-row">
+                      <span className="detail-label">Costo:</span>
+                      <span className="detail-value">${parseFloat(trackingData.cost || 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {/* === VISTA OPERARIO/ADMIN: GESTIÓN COMPLETA === */}
+        {/* === VISTA OPERARIO/ADMIN: GESTIÓN COMPLETA MEJORADA === */}
         {activeTab === "management" &&
           ["operator", "operario", "admin"].includes(
             currentUser.role?.toLowerCase()
           ) && (
             <div className="tab-content">
-              <h2>⚙️ Gestión Completa de Envíos</h2>
-              <p>
-                <em>
-                  Vista de {currentUser.role} - Gestión de todos los envíos del
-                  sistema
-                </em>
-              </p>
-
-              <div className="action-buttons">
-                <button
-                  onClick={() => {
-                    getAllPackages();
-                    getMessengers();
-                  }}
-                >
-                  🔄 Actualizar Lista
-                </button>
-                <button
-                  onClick={() => {
-                    setShowCreatePackage(true);
-                    getMessengers();
-                  }}
-                >
-                  ➕ Nuevo Envío
-                </button>
-              </div>
-
-              {/* Mostrar mensaje si no hay envíos */}
-              {allPackages.length === 0 ? (
-                <div className="card">
-                  <p>⚠️ No hay envíos registrados en el sistema.</p>
-                </div>
-              ) : (
-                <div className="management-list">
-                  <h3>📦 Todos los Envíos ({allPackages.length})</h3>
-                  <div className="packages-grid">
-                    {allPackages.map((pkg) => (
-                      <div
-                        key={pkg.id}
-                        className="package-management-card card"
-                      >
-                        <div className="package-header">
-                          <h4>{pkg.tracking_code}</h4>
-                          <span
-                            className={`status ${pkg.status
-                              .toLowerCase()
-                              .replace(" ", "-")}`}
-                          >
-                            {pkg.status}
-                          </span>
-                        </div>
-                        <p>
-                          <strong>De:</strong> {pkg.sender_name}
-                        </p>
-                        <p>
-                          <strong>Para:</strong> {pkg.recipient_name}
-                        </p>
-                        <p>
-                          <strong>Dirección:</strong> {pkg.delivery_address}
-                        </p>
-                        <p>
-                          <strong>Cliente:</strong>{" "}
-                          {pkg.client_name || "No asignado"}
-                        </p>
-                        {pkg.messenger_name && (
-                          <p>
-                            <strong>Mensajero:</strong> {pkg.messenger_name}
-                          </p>
-                        )}
-
-                        {/* Selector para asignar mensajero */}
-                        <div className="form-group">
-                          <label>Asignar mensajero:</label>
-                          <select
-                            className="messenger-select"
-                            onChange={(e) =>
-                              assignMessenger(pkg.id, e.target.value)
-                            }
-                            defaultValue=""
-                          >
-                            <option value="">Seleccionar mensajero</option>
-                            {messengers.map((messenger) => (
-                              <option key={messenger.id} value={messenger.id}>
-                                {messenger.first_name} {messenger.last_name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="package-actions">
-                          <button
-                            onClick={() =>
-                              updatePackageStatus(pkg.id, "in_transit")
-                            }
-                          >
-                            🚚 En Tránsito
-                          </button>
-                          <button
-                            onClick={() =>
-                              updatePackageStatus(pkg.id, "out_for_delivery")
-                            }
-                          >
-                            📦 En Entrega
-                          </button>
-                          <button
-                            onClick={() =>
-                              updatePackageStatus(pkg.id, "delivered")
-                            }
-                          >
-                            ✅ Entregado
-                          </button>
-                          <button onClick={() => generateQR(pkg.id)}>
-                            📱 Generar QR
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <ShipmentManagement 
+                currentUser={currentUser} 
+                onMessage={setMessage} 
+              />
             </div>
           )}
 
-        {/* === VISTA MENSAJERO: MIS ENTREGAS === */}
-        {activeTab === "my-deliveries" && currentUser.role === "messenger" && (
+        {/* === VISTA CLIENTE: MIS ENVÍOS === */}
+        {activeTab === "my-packages" && ["client", "cliente"].includes(currentUser.role?.toLowerCase()) && (
           <div className="tab-content">
-            <h2>🚗 Mis Entregas</h2>
+            <div className="section-header">
+              <h2>📋 Mis Envíos</h2>
+              <p>Gestiona y realiza seguimiento a todos tus envíos registrados</p>
+            </div>
+            
+            {/* CLIENTE PUEDE CREAR ENVÍOS */}
+            <div className="action-buttons">
+              <button
+                onClick={() => setShowCreatePackage(true)}
+                className="btn-new-package"
+              >
+                ➕ Crear Nuevo Envío
+              </button>
+            </div>
+
             {allPackages.length > 0 ? (
               <div className="packages-grid">
                 {allPackages.map((pkg) => (
                   <div key={pkg.id} className="package-card card">
-                    <h4>{pkg.tracking_code}</h4>
-                    <p>
-                      <strong>Cliente:</strong> {pkg.client_name}
-                    </p>
-                    <p>
-                      <strong>Dirección:</strong> {pkg.delivery_address}
-                    </p>
-                    <p>
-                      <strong>Estado:</strong> {pkg.status}
-                    </p>
+                    <div className="package-header">
+                      <h4>{pkg.tracking_code}</h4>
+                      <span className={`status ${getStatusClass(pkg.status)}`}>
+                        {traducirEstado(pkg.status)}
+                      </span>
+                    </div>
+                    
+                    <div className="package-details">
+                      <div className="detail-row">
+                        <span className="detail-label">Destinatario:</span>
+                        <span className="detail-value">{pkg.recipient_name}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Dirección:</span>
+                        <span className="detail-value">{pkg.delivery_address}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Descripción:</span>
+                        <span className="detail-value">{pkg.package_description || "No especificada"}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Estado:</span>
+                        <span className={`status ${getStatusClass(pkg.status)}`}>
+                          {traducirEstado(pkg.status)}
+                        </span>
+                      </div>
+                      {pkg.messenger_name && (
+                        <div className="detail-row">
+                          <span className="detail-label">Mensajero:</span>
+                          <span className="detail-value">👤 {pkg.messenger_name}</span>
+                        </div>
+                      )}
+                      {pkg.cost && (
+                        <div className="detail-row">
+                          <span className="detail-label">Costo:</span>
+                          <span className="detail-value">${parseFloat(pkg.cost).toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="package-actions">
+                      <button onClick={() => generateQR(pkg.id)} className="btn-qr">
+                        📱 Código QR
+                      </button>
+                      
+                      {/* Cliente puede eliminar sus envíos no asignados */}
+                      {(!pkg.assigned_messenger_id || pkg.status === 'registered') && (
+                        <button 
+                          onClick={() => deletePackage(pkg.id)} 
+                          className="btn-delete"
+                        >
+                          🗑️ Eliminar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <div className="empty-icon">📦</div>
+                <h3>No tienes envíos registrados</h3>
+                <p>Comienza creando tu primer envío</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* === VISTA MENSAJERO: MIS ENTREGAS === */}
+        {activeTab === "my-deliveries" && ["messenger", "mensajero"].includes(currentUser.role?.toLowerCase()) && (
+          <div className="tab-content">
+            <div className="section-header">
+              <h2>🚗 Mis Entregas</h2>
+              <p>Gestiona las entregas asignadas a tu ruta</p>
+            </div>
+            
+            {allPackages.length > 0 ? (
+              <div className="packages-grid">
+                {allPackages.map((pkg) => (
+                  <div key={pkg.id} className="package-card card">
+                    <div className="package-header">
+                      <h4>{pkg.tracking_code}</h4>
+                      <span className={`status ${getStatusClass(pkg.status)}`}>
+                        {traducirEstado(pkg.status)}
+                      </span>
+                    </div>
+                    
+                    <div className="package-details">
+                      <div className="detail-row">
+                        <span className="detail-label">Cliente:</span>
+                        <span className="detail-value">{pkg.client_name}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Dirección:</span>
+                        <span className="detail-value">{pkg.delivery_address}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Destinatario:</span>
+                        <span className="detail-value">{pkg.recipient_name}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Descripción:</span>
+                        <span className="detail-value">{pkg.package_description || "No especificada"}</span>
+                      </div>
+                    </div>
+                    
                     <div className="package-actions">
                       <button
-                        onClick={() =>
-                          updatePackageStatus(pkg.id, "in_transit")
-                        }
+                        onClick={() => updatePackageStatus(pkg.id, "in_transit")}
+                        className={`state-btn ${pkg.status === 'in_transit' ? 'active' : ''}`}
                       >
                         🚚 En tránsito
                       </button>
                       <button
-                        onClick={() =>
-                          updatePackageStatus(pkg.id, "out_for_delivery")
-                        }
+                        onClick={() => updatePackageStatus(pkg.id, "out_for_delivery")}
+                        className={`state-btn ${pkg.status === 'out_for_delivery' ? 'active' : ''}`}
                       >
                         📦 En entrega
                       </button>
                       <button
                         onClick={() => updatePackageStatus(pkg.id, "delivered")}
+                        className={`state-btn ${pkg.status === 'delivered' ? 'active' : ''}`}
                       >
                         ✅ Entregado
                       </button>
@@ -1100,38 +1429,19 @@ function MainApp() {
                 ))}
               </div>
             ) : (
-              <p>No tienes entregas asignadas.</p>
+              <div className="empty-state">
+                <div className="empty-icon">📭</div>
+                <h3>No tienes entregas asignadas</h3>
+                <p>Las entregas aparecerán aquí cuando te sean asignadas</p>
+              </div>
             )}
           </div>
         )}
 
-        {/* === VISTA CLIENTE: MIS ENVÍOS === */}
-        {activeTab === "my-packages" && currentUser.role === "client" && (
+        {/* === VISTA REPORTES === */}
+        {activeTab === "reportes" && (
           <div className="tab-content">
-            <h2>📋 Mis Envíos</h2>
-            {allPackages.length > 0 ? (
-              <div className="packages-grid">
-                {allPackages.map((pkg) => (
-                  <div key={pkg.id} className="package-card card">
-                    <h4>{pkg.tracking_code}</h4>
-                    <p>
-                      <strong>Destinatario:</strong> {pkg.recipient_name}
-                    </p>
-                    <p>
-                      <strong>Dirección:</strong> {pkg.delivery_address}
-                    </p>
-                    <p>
-                      <strong>Estado:</strong> {pkg.status}
-                    </p>
-                    <button onClick={() => generateQR(pkg.id)}>
-                      📱 Ver QR
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>No tienes envíos registrados.</p>
-            )}
+            <ReportesComponent packages={allPackages} messengers={messengers} />
           </div>
         )}
 
