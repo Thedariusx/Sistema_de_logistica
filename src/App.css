@@ -1479,4 +1479,87 @@ button:active {
     gap: 10px;
     align-items: flex-start;
   }
+  /* ===== ESTILOS MEJORADOS PARA VALIDACIONES DE FORMULARIO ===== */
+
+/* Estilos para campos con error */
+.register-form input.error,
+.register-form select.error {
+  border-color: #e74c3c !important;
+  border-width: 2px !important;
+  background-color: #fdf2f2;
+}
+
+/* Estilos para alertas de error - SIMILARES AL EJEMPLO */
+.alert-error {
+  display: block;
+  background-color: #fff5f5;
+  color: #c53030;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  border: 1px solid #fed7d7;
+  border-left: 4px solid #e53e3e;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mejorar el espaciado en los grupos del formulario */
+.register-form .form-group {
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.register-form .form-row {
+  margin-bottom: 5px;
+}
+
+/* Estilos específicos para las etiquetas de campos requeridos */
+.register-form label.required::after {
+  content: " *";
+  color: #e53e3e;
+  font-weight: bold;
+}
+
+/* Asegurar que los inputs mantengan buen espaciado */
+.register-form input,
+.register-form select {
+  transition: all 0.2s ease;
+  margin-bottom: 2px;
+}
+
+.register-form input:focus,
+.register-form select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Contenedor del formulario para mejor alineación */
+.register-form {
+  padding: 0;
+}
+
+/* Estilos responsivos para pantallas pequeñas */
+@media (max-width: 768px) {
+  .alert-error {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .register-form .form-group {
+    margin-bottom:10px;
+}
+}
 }
